@@ -1,24 +1,32 @@
+%%
 %% A simple message passing / chat application.
 %%
-%% Interface: simple_chat:start(UserName, FriendName).
 
 -module(simple_chat).
--export([start/2, chatSend/1]).
+-export([start/3, listenForMessages/0]).
 
-start(UserName, FriendName) ->
-  spawn(simple_chat, chatSend, [FriendName]).
-%%  register(UserName, spawn(simple_chat, chatListen, [FriendName])).
+start(User, Friend, FriendNode) ->
+  register(User, spawn(?MODULE, listenForMessages, [])),
+  io:format("Chatting with ~p. Type 'finished' to exit.~n", [Friend]),
+  sendMessages(false, Friend, FriendNode).
 
-
-chatListen(FriendName) ->
+listenForMessages() ->
   receive
-    {FromUserName, Message} when FromUserName == FriendName->
-      io:format("~s: ~s~n", [FriendName, Message]),
-      chatListen(FriendName)
+    {"finished\n"} ->
+      io:format("Chat session finished.~n", []),
+      exit(normal);
+    {Message} -> 
+      io:format("~s", [Message]),
+      listenForMessages()
   end.
 
-chatSend(FriendName) ->
-%%  timer:sleep(100),
-%%  Message = io:get_line(">"),
-%%  io:format("~s~n", [Message]),
-  friend ! {"test"}.
+sendMessages(Finished, Friend, FriendNode) ->
+  if 
+    Finished ->
+      exit(normal);
+    not Finished ->
+      ok
+  end,
+  Message = io:get_line(">"),
+  {Friend, FriendNode} ! {Message},
+  sendMessages(string:equal(Message, "finished\n"), Friend, FriendNode).
