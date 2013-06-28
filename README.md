@@ -2,7 +2,7 @@ erl-tests
 =========
 
 Simple Erlang tests meant to be compared to the chat tests written in Waldo, 
-which can be found at github.com/JayThomason/waldo-tests.
+which can be found [here](https://github.com/JayThomason/waldo-tests).
 
 simple_chat.erl is a two user chat while multi_chat.erl is a basic chatroom.
 
